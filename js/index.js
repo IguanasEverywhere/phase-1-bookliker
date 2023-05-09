@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .then(booksData => displayAllBooks(booksData))
 
   function displayAllBooks(booksData) {
+    bookList.textContent = '';
     booksData.forEach(book => {
       let title = document.createElement('li');
       title.textContent = book.title;
@@ -66,9 +67,13 @@ document.addEventListener("DOMContentLoaded", function () {
           users: [...book.users, { id: 11, username: 'Scott' }]
         })
       })
-        .then(data => fetch(`http://localhost:3000/books/${book.id}`)
-          .then(response => response.json())
-          .then(bookD => displayBookDetail(bookD)))
+        .then(response => response.json())
+        .then(book => {
+          displayBookDetail(book) // update DOM currently
+          fetch(`http://localhost:3000/books`) // do another fetch  and call displayAllBooks so that they have latest data
+            .then(res => res.json())
+            .then(books => displayAllBooks(books))
+        })
     } else {
       removeLike(book);
     }
@@ -88,8 +93,12 @@ document.addEventListener("DOMContentLoaded", function () {
         users: book.users
       })
     })
-      .then(data => fetch(`http://localhost:3000/books/${book.id}`)
-        .then(response => response.json())
-        .then(bookD => displayBookDetail(bookD)))
+      .then(response => response.json())
+      .then(book => {
+        displayBookDetail(book);
+        fetch('http://localhost:3000/books')
+          .then(res => res.json())
+          .then(books => displayAllBooks(books))
+      })
   }
 });
